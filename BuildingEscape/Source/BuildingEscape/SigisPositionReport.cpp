@@ -23,7 +23,10 @@ void USigisPositionReport::BeginPlay()
 
 	FString name = GetOwner()->GetName();
 
+	FString transform = GetOwner()->GetTransform().ToString();
+
 	UE_LOG(LogTemp, Warning, TEXT("Dies das %s"), *name);
+	//UE_LOG(LogTemp, Warning, TEXT("Transform: %s"), *transform);
 	
 }
 
@@ -33,6 +36,13 @@ void USigisPositionReport::TickComponent( float DeltaTime, ELevelTick TickType, 
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	// ...
+	UE_LOG(LogTemp, Warning, TEXT("Updating location"));
+
+	FVector oldLocation = GetOwner()->GetTransform().GetLocation();
+
+	FVector newLocation = oldLocation + FVector(1, 0, 0);
+
+	GetOwner()->SetActorLocation(newLocation);
+
 }
 
