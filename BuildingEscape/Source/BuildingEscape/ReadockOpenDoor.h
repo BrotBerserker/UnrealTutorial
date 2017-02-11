@@ -21,12 +21,17 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
+	void MoveDoor();
 	void OpenDoor();
+	void CloseDoor();
 
 private:
 
+
 	UPROPERTY(EditAnywhere)
-		bool openDoor = false;
+		float CloseDoorDelay = 0;
+	UPROPERTY(EditAnywhere)
+		bool ManualTrigger = false;
 	UPROPERTY(EditAnywhere)
 		ATriggerVolume* TriggerSensor;
 	UPROPERTY(EditAnywhere)

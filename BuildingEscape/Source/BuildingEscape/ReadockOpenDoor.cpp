@@ -5,6 +5,10 @@
 
 
 float startRoation;
+float doorMovementAngle = 0;
+int doorMovementDirection = 1;
+bool movingDoor = false;
+float doorLastOpenTime = 0;
 
 // Sets default values for this component's properties
 UReadockOpenDoor::UReadockOpenDoor()
@@ -38,23 +42,48 @@ void UReadockOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FAct
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	if (TriggerSensor!= NULL && ActorThatOpens!= NULL 
-		&& TriggerSensor->IsOverlappingActor(ActorThatOpens))
-		openDoor = true;
-
-	if(openDoor)
+	if (ManualTrigger) {
 		OpenDoor();
+		ManualTrigger = false;
+	}
 
+	if (TriggerSensor != NULL && ActorThatOpens != NULL
+		&& TriggerSensor->IsOverlappingActor(ActorThatOpens)) {
+		OpenDoor();
+	}
+
+	if (!movingDoor && GetWorld()->GetTimeSeconds()-doorLastOpenTime >= CloseDoorDelay) {
+		CloseDoor();
+	}
+
+	if(movingDoor)
+		MoveDoor();
 }
 
 void UReadockOpenDoor::OpenDoor() {
+	doorMovementAngle = RotationAngle;
+	doorMovementDirection = -1;
+	movingDoor = true;
+}
+
+void UReadockOpenDoor::CloseDoor() {
+	doorMovementAngle = 0;
+	doorMovementDirection = -1;
+	movingDoor = true;
+}
+
+
+void UReadockOpenDoor::MoveDoor() {
 	auto transform = GetOwner()->GetTransform();
-	bool lastStep = IsBetween(FRotator(GetOwner()->GetTransform().GetRotation()).Yaw, startRoation + RotationAngle + RotationSpeed + 0.1, startRoation + RotationAngle - RotationSpeed - 0.1);
+	bool lastStep = IsBetween(FRotator(GetOwner()->GetTransform().GetRotation()).Yaw, 
+							  startRoation + doorMovementAngle+ RotationSpeed + 0.1, 
+							  startRoation + doorMovementAngle - RotationSpeed - 0.1);
 	if (lastStep) {
-		openDoor = false;
+		movingDoor = false;
+		doorLastOpenTime = GetWorld()->GetTimeSeconds();
 		return;
 	}
-	auto newRotation = FRotator(transform.GetRotation()) + FRotator(0, RotationSpeed, 0);
+	auto newRotation = FRotator(transform.GetRotation()) + FRotator(0, doorMovementDirection * RotationSpeed, 0);
 	//newRotation.Yaw = lastStep ? startRoation + RotationAngle : newRotation.Yaw;
 	GetOwner()->SetActorRotation(newRotation);
 }
