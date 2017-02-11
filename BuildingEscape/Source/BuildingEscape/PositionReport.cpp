@@ -22,6 +22,13 @@ void UPositionReport::BeginPlay()
 
 	auto name = GetOwner()->GetName();
 	UE_LOG(LogTemp, Warning, TEXT("%s says: Banana!"), *name);
+
+
+	auto transform = GetOwner()->GetTransform();
+	UE_LOG(LogTemp, Warning, TEXT("%s Pos: %s"), *name, *transform.ToString());
+	UE_LOG(LogTemp, Warning, TEXT("X: %f"), transform.GetLocation().X);
+	UE_LOG(LogTemp, Warning, TEXT("Y: %f"), transform.GetLocation().Y);
+	UE_LOG(LogTemp, Warning, TEXT("Z: %f"), transform.GetLocation().Z);	
 	
 }
 
@@ -31,6 +38,11 @@ void UPositionReport::TickComponent( float DeltaTime, ELevelTick TickType, FActo
 {
 	Super::TickComponent( DeltaTime, TickType, ThisTickFunction );
 
-	// ...
+
+	auto name = GetOwner()->GetName();
+	auto transform = GetOwner()->GetTransform();
+	UE_LOG(LogTemp, Warning, TEXT("%s Pos: %s"), *name, *transform.ToString());
+	//transform.TransformPosition (transform.GetLocation() + FVector(0,0,10) );
+	GetOwner()->SetActorLocation(transform.GetLocation() + FVector(0, 0, 10));
 }
 
