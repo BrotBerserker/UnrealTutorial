@@ -3,7 +3,14 @@
 #include "BuildingEscape.h"
 #include "SigiOpenDoor.h"
 
-bool openingDoor = false;
+enum DoorState {
+	OPEN,
+	CLOSED,
+	OPENING,
+	CLOSING
+};
+
+int state = DoorState::CLOSED;
 
 // Sets default values for this component's properties
 USigiOpenDoor::USigiOpenDoor()
@@ -31,17 +38,36 @@ void USigiOpenDoor::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (isDoorTriggered()) {
-		openingDoor = true;
+	if (isOpenDoorTriggered()) {
+		state = DoorState::OPENING;
 	}
 
-	if (openingDoor) {
+	if (isCloseDoorTriggered()) {
+		state = DoorState::CLOSING;
+	}
+
+	if (state == DoorState::OPENING) {
 		OpenDoor();
+	}
+
+	if (state == DoorState::CLOSING) {
+		CloseDoor();
 	}
 }
 
-bool USigiOpenDoor::isDoorTriggered()
+bool USigiOpenDoor::isCloseDoorTriggered()
 {
+	if (state != DoorState::OPEN) {
+		return false;
+	}
+	return LastDoorOpenTime + DoorCloseDelay <= GetWorld()->GetTimeSeconds();
+}
+
+bool USigiOpenDoor::isOpenDoorTriggered()
+{
+	if (state != DoorState::CLOSED) {
+		return false;
+	}
 	if (PressurePlate == NULL) {
 		return false;
 	}
@@ -56,9 +82,10 @@ void USigiOpenDoor::OpenDoor()
 	FRotator rot = FRotator(GetOwner()->GetTransform().GetRotation());
 	float angle = rot.GetDenormalized().Yaw;
 
-	float angleDiff = angle - maxAngle;
+	float angleDiff = angle - openAngle;
 	if (angleDiff >= 0 && angleDiff <= FMath::Abs(openSpeed)) {
-		openingDoor = false;
+		state = DoorState::OPEN;
+		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
 		return;
 	}
 
@@ -66,4 +93,21 @@ void USigiOpenDoor::OpenDoor()
 
 	GetOwner()->SetActorRotation(rot);
 }
+
+void USigiOpenDoor::CloseDoor()
+{
+	FRotator rot = FRotator(GetOwner()->GetTransform().GetRotation());
+	float angle = rot.GetDenormalized().Yaw;
+
+	float angleDiff = angle - closedAngle;
+	if (angleDiff >= 0 && angleDiff <= FMath::Abs(openSpeed)) {
+		state = DoorState::CLOSED;
+		return;
+	}
+
+	rot += FRotator(0, -openSpeed, 0);
+
+	GetOwner()->SetActorRotation(rot);
+}
+
 

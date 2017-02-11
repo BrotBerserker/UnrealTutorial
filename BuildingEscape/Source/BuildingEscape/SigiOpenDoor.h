@@ -12,6 +12,7 @@ class BUILDINGESCAPE_API USigiOpenDoor : public UActorComponent
 	GENERATED_BODY()
 
 public:	
+
 	// Sets default values for this component's properties
 	USigiOpenDoor();
 
@@ -21,9 +22,13 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
-	bool isDoorTriggered();
+	bool isCloseDoorTriggered();
+
+	bool isOpenDoorTriggered();
 
 	void OpenDoor();
+
+	void CloseDoor();
 
 private:
 
@@ -34,9 +39,17 @@ private:
 	AActor* ActorThatOpens;
 
 	UPROPERTY(EditAnywhere)
+	float DoorCloseDelay;
+
+	float LastDoorOpenTime;
+
+	UPROPERTY(EditAnywhere)
 	float openSpeed = 2;
 
 	UPROPERTY(EditAnywhere, meta = (UIMin = "0", UIMax = "359", ClampMin = "0", ClampMax = "359"))
-	float maxAngle = 180;
-	
+	float openAngle = 180;
+
+	UPROPERTY(EditAnywhere, meta = (UIMin = "0", UIMax = "359", ClampMin = "0", ClampMax = "359"))
+	float closedAngle = 180;
+
 };
