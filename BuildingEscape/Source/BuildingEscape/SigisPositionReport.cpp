@@ -4,6 +4,7 @@
 #include "SigisPositionReport.h"
 
 
+
 // Sets default values for this component's properties
 USigisPositionReport::USigisPositionReport()
 {
@@ -20,7 +21,11 @@ void USigisPositionReport::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
+	UE_LOG(LogTemp, Warning, TEXT("Dies das Ananas from Chair !"));
+
+	FString name = GetOwner()->GetName();
+
+	UE_LOG(LogTemp, Warning, TEXT("Dies das %s"), *name);
 	
 }
 
