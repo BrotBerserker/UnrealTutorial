@@ -26,7 +26,6 @@ void USigisPositionReport::BeginPlay()
 	FString transform = GetOwner()->GetTransform().ToString();
 
 	UE_LOG(LogTemp, Warning, TEXT("Dies das %s"), *name);
-	//UE_LOG(LogTemp, Warning, TEXT("Transform: %s"), *transform);
 	
 }
 
