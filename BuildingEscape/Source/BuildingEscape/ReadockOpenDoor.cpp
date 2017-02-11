@@ -62,7 +62,7 @@ void UReadockOpenDoor::TickComponent( float DeltaTime, ELevelTick TickType, FAct
 
 void UReadockOpenDoor::OpenDoor() {
 	doorMovementAngle = RotationAngle;
-	doorMovementDirection = -1;
+	doorMovementDirection = 1;
 	movingDoor = true;
 }
 
