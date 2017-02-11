@@ -21,8 +21,6 @@ void USigisPositionReport::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UE_LOG(LogTemp, Warning, TEXT("Dies das Ananas from Chair !"));
-
 	FString name = GetOwner()->GetName();
 
 	UE_LOG(LogTemp, Warning, TEXT("Dies das %s"), *name);
