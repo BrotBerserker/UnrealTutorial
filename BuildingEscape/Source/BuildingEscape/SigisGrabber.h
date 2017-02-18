@@ -6,6 +6,8 @@
 #include "SigisGrabber.generated.h"
 
 
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPE_API USigisGrabber : public UActorComponent
 {
@@ -20,20 +22,29 @@ public:
 	
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
-
-		
 	
 private: 
 
-	float reach = 100.f;
+	struct ViewPoint {
+		FVector pos;
+		FRotator rot;
+		FVector targetpos;
 
-	UPhysicsHandleComponent* physicsHandle = nullptr;
+		ViewPoint(FVector spos, FRotator srot, FVector stargetpos);
+	};
 
-	UInputComponent* pawnInput = nullptr;
-
+	float reach = 150.f;
 
 	void InitializeShit();
 
 	void Grab();
+	void Release();
 
+	UPhysicsHandleComponent* physicsHandle = nullptr;
+	UInputComponent* pawnInput = nullptr;
+
+	UPrimitiveComponent* grabbableComponent = nullptr;
+	UPrimitiveComponent* findGrabbableComponent();
+
+	ViewPoint getViewPoint();
 };
