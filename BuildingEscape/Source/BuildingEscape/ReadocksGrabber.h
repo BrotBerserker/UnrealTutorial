@@ -19,17 +19,30 @@ public:
 	virtual void BeginPlay() override;
 
 	
+
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
-private:
-	float reach = 100.f;
+	UPrimitiveComponent* GetGrabbableComponent();
 
+private:
+	//struct Asdf {
+	//	int A;
+	//	int B;
+	//};
+
+	float reach = 100.f;
+	bool isGrabbingComponent = false;
 	
+	FVector currentPos;
+	FRotator currentRot;	
 
 	UPhysicsHandleComponent* physicsHandle = nullptr;
 	UInputComponent* pawnInput = nullptr;
 
-	void FindComponents();
+	void FindAndInitComponents();
 	void Grab();
+	void Release();
+
+	//Asdf Test();
 };

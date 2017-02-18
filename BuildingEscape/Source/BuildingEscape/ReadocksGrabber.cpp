@@ -6,27 +6,22 @@
 
 #define OUT
 
+
 // Sets default values for this component's properties
 UReadocksGrabber::UReadocksGrabber() {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
 // Called when the game starts
 void UReadocksGrabber::BeginPlay() {
-	Super::BeginPlay();
-
-	UE_LOG(LogTemp, Warning, TEXT("Grabber reporting for duty!"));
-
-	FindComponents();
-
+	Super::BeginPlay();	
+	FindAndInitComponents();
 }
 
-void UReadocksGrabber::FindComponents() {
+void UReadocksGrabber::FindAndInitComponents() {
 	physicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 	pawnInput = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (!physicsHandle) {
@@ -34,42 +29,57 @@ void UReadocksGrabber::FindComponents() {
 	}
 	if (!pawnInput) {
 		UE_LOG(LogTemp, Error, TEXT("No UInputComponent found on %s!"), *GetOwner()->GetName());
-		/// Bind input
 	} else {
+		/// Bind input
 		pawnInput->BindAction("Grab", IE_Pressed, this, &UReadocksGrabber::Grab);
+		pawnInput->BindAction("Grab", IE_Released, this, &UReadocksGrabber::Release);
 	}
 }
 
 void UReadocksGrabber::Grab() {
-	UE_LOG(LogTemp, Warning, TEXT("Grab pressed"));
+	auto component = GetGrabbableComponent();
+	if (component) {
+		physicsHandle->GrabComponentAtLocationWithRotation(component, NAME_None, component->GetOwner()->GetActorLocation(), component->GetOwner()->GetActorRotation());
+		isGrabbingComponent = true;
+	}
 }
 
-// Called every frame
+void UReadocksGrabber::Release() {
+	isGrabbingComponent = false;
+	physicsHandle->ReleaseComponent();
+}
+
+
+//UReadocksGrabber::Asdf UReadocksGrabber::Test() { Asdf b;  return b; }
+
 void UReadocksGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	// update current position and rotation
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT currentPos, OUT currentRot);
 
-	/// Get player view point this tick
-	FVector pos;
-	FRotator rot;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT pos, OUT rot);
-	//UE_LOG(LogTemp, Warning, TEXT("Vect: %s \n Rot: %s"), *pos.ToString(), *rot.ToString());
+	auto lineTrace = currentPos + currentRot.Vector() * reach;
+	if(isGrabbingComponent)
+		physicsHandle->SetTargetLocation(lineTrace);
+	
+}
 
-	auto lineTrace = pos + rot.Vector() * reach;
+UPrimitiveComponent* UReadocksGrabber::GetGrabbableComponent() {
+	auto lineTrace = currentPos + currentRot.Vector() * reach;
 
 	/// Ray-cast
 	FHitResult hitResult;
 	bool hit = GetWorld()->LineTraceSingleByObjectType(
 		OUT hitResult,
-		pos,
+		currentPos,
 		lineTrace,
 		FCollisionObjectQueryParams(ECollisionChannel::ECC_PhysicsBody),
 		FCollisionQueryParams(FName(TEXT("")), false, GetOwner()));
 	if (hit) {
-		UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *hitResult.GetActor()->GetName());
-		DrawDebugLine(GetWorld(), pos, lineTrace, FColorList::Red, false, 0, 0, 5);
-	} else {
-		DrawDebugLine(GetWorld(), pos, lineTrace, FColorList::Orange, false, 0, 0, 5);
+		//UE_LOG(LogTemp, Warning, TEXT("Hit: %s"), *hitResult.GetActor()->GetName());
+		DrawDebugLine(GetWorld(), currentPos, lineTrace, FColorList::Red, false, 0, 0, 5);
 	}
-	//
+	DrawDebugLine(GetWorld(), currentPos, lineTrace, FColorList::Orange, false, 0, 0, 5);
+	return hitResult.GetComponent();
 }
+
 
