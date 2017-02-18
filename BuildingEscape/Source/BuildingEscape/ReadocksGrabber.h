@@ -32,7 +32,6 @@ private:
 	//};
 
 	float reach = 100.f;
-	bool isGrabbingComponent = false;
 	
 	FVector currentPos;
 	FRotator currentRot;	

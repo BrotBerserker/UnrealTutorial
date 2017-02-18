@@ -39,13 +39,11 @@ void UReadocksGrabber::FindAndInitComponents() {
 void UReadocksGrabber::Grab() {
 	auto component = GetGrabbableComponent();
 	if (component) {
-		physicsHandle->GrabComponentAtLocationWithRotation(component, NAME_None, component->GetOwner()->GetActorLocation(), component->GetOwner()->GetActorRotation());
-		isGrabbingComponent = true;
+		physicsHandle->GrabComponentAtLocationWithRotation(component, NAME_None, component->GetOwner()->GetActorLocation(), component->GetOwner()->GetActorRotation());		
 	}
 }
 
 void UReadocksGrabber::Release() {
-	isGrabbingComponent = false;
 	physicsHandle->ReleaseComponent();
 }
 
@@ -58,7 +56,7 @@ void UReadocksGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(OUT currentPos, OUT currentRot);
 
 	auto lineTrace = currentPos + currentRot.Vector() * reach;
-	if(isGrabbingComponent)
+	if(physicsHandle->GrabbedComponent)
 		physicsHandle->SetTargetLocation(lineTrace);
 	
 }
