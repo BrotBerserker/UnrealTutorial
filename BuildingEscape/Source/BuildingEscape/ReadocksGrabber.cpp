@@ -19,16 +19,18 @@ UReadocksGrabber::UReadocksGrabber() {
 void UReadocksGrabber::BeginPlay() {
 	Super::BeginPlay();	
 	FindAndInitComponents();
+	//UGameplayStatics::SetGamePaused(GetWorld(), true);
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ERROR!"));	
 }
 
 void UReadocksGrabber::FindAndInitComponents() {
 	physicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 	pawnInput = GetOwner()->FindComponentByClass<UInputComponent>();
 	if (!physicsHandle) {
-		UE_LOG(LogTemp, Error, TEXT("No UPhysicsHandleComponent found on %s!"), *GetOwner()->GetName());
+		UE_LOG(LogTemp, Fatal, TEXT("No UPhysicsHandleComponent found on %s!"), *GetOwner()->GetName());
 	}
 	if (!pawnInput) {
-		UE_LOG(LogTemp, Error, TEXT("No UInputComponent found on %s!"), *GetOwner()->GetName());
+		UE_LOG(LogTemp, Fatal, TEXT("No UInputComponent found on %s!"), *GetOwner()->GetName());
 	} else {
 		/// Bind input
 		pawnInput->BindAction("Grab", IE_Pressed, this, &UReadocksGrabber::Grab);
