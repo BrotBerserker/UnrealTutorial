@@ -3,14 +3,6 @@
 #include "BuildingEscape.h"
 #include "SigiOpenDoor.h"
 
-enum DoorState {
-	OPEN,
-	CLOSED,
-	OPENING,
-	CLOSING
-};
-
-int state = DoorState::CLOSED;
 
 // Sets default values for this component's properties
 USigiOpenDoor::USigiOpenDoor()
@@ -18,7 +10,6 @@ USigiOpenDoor::USigiOpenDoor()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
 	// ...
 }
 
@@ -28,8 +19,10 @@ void USigiOpenDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
-	
+	if (!ensure(PressurePlate != nullptr)) {
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, TEXT("ALARM!"));
+		UGameplayStatics::SetGamePaused(GetWorld(), true);
+	}
 }
 
 
@@ -60,6 +53,9 @@ bool USigiOpenDoor::isCloseDoorTriggered()
 	if (state != DoorState::OPEN) {
 		return false;
 	}
+	if (isTriggerTriggered()) {
+		return false;
+	}
 	return LastDoorOpenTime + DoorCloseDelay <= GetWorld()->GetTimeSeconds();
 }
 
@@ -71,43 +67,69 @@ bool USigiOpenDoor::isOpenDoorTriggered()
 	if (PressurePlate == NULL) {
 		return false;
 	}
-	if (ActorThatOpens == NULL) {
-		return false;
-	}
-	return PressurePlate->IsOverlappingActor(ActorThatOpens);
+	return isTriggerTriggered();
+}
+
+bool USigiOpenDoor::isTriggerTriggered()
+{
+	return GetTotalMassOfActorsOnPlate() > TriggerMass;
 }
 
 void USigiOpenDoor::OpenDoor()
 {
-	FRotator rot = FRotator(GetOwner()->GetTransform().GetRotation());
-	float angle = rot.GetDenormalized().Yaw;
+	//FRotator rot = FRotator(GetOwner()->GetTransform().GetRotation());
+	//float angle = rot.GetDenormalized().Yaw;
 
-	float angleDiff = angle - openAngle;
-	if (angleDiff >= 0 && angleDiff <= FMath::Abs(openSpeed)) {
-		state = DoorState::OPEN;
-		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
-		return;
-	}
+	//float angleDiff = angle - openAngle;
+	//if (angleDiff >= 0 && angleDiff <= FMath::Abs(openSpeed)) {
+	//	state = DoorState::OPEN;
+	//	LastDoorOpenTime = GetWorld()->GetTimeSeconds();
+	//	return;
+	//}
 
-	rot += FRotator(0, openSpeed, 0);
+	//rot += FRotator(0, openSpeed, 0);
 
-	GetOwner()->SetActorRotation(rot);
+	//GetOwner()->SetActorRotation(rot);
+
+	OnOpenRequest.Broadcast();
+	state = DoorState::OPEN;
+	LastDoorOpenTime = GetWorld()->GetTimeSeconds();
+
 }
 
 void USigiOpenDoor::CloseDoor()
 {
-	FRotator rot = FRotator(GetOwner()->GetTransform().GetRotation());
-	float angle = rot.GetDenormalized().Yaw;
+	//FRotator rot = FRotator(GetOwner()->GetTransform().GetRotation());
+	//float angle = rot.GetDenormalized().Yaw;
 
-	float angleDiff = angle - closedAngle;
-	if (angleDiff >= 0 && angleDiff <= FMath::Abs(openSpeed)) {
-		state = DoorState::CLOSED;
-		return;
+	//float angleDiff = angle - closedAngle;
+	//if (angleDiff >= 0 && angleDiff <= FMath::Abs(openSpeed)) {
+	//	state = DoorState::CLOSED;
+	//	return;
+	//}
+
+	//rot += FRotator(0, -openSpeed, 0);
+
+	//GetOwner()->SetActorRotation(rot);
+	OnCloseRequest.Broadcast();
+	state = DoorState::CLOSED;
+}
+
+float USigiOpenDoor::GetTotalMassOfActorsOnPlate()
+{
+	float totalMass = 0.f;
+
+	TArray<AActor*> actors;
+	PressurePlate->GetOverlappingActors(actors);
+
+	for (const auto& actor : actors) {
+		totalMass += actor->FindComponentByClass<UPrimitiveComponent>()->GetMass();
+		//UE_LOG(LogTemp, Warning, TEXT("Mass: %s"), *actor->GetName())
 	}
 
-	rot += FRotator(0, -openSpeed, 0);
+	//UE_LOG(LogTemp, Warning, TEXT("Mass: %f"), totalMass)
 
-	GetOwner()->SetActorRotation(rot);
+	return totalMass;
 }
 
 

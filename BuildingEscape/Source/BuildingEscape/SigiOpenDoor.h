@@ -5,6 +5,7 @@
 #include "Components/ActorComponent.h"
 #include "SigiOpenDoor.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDoorEvent);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPE_API USigiOpenDoor : public UActorComponent
@@ -22,34 +23,53 @@ public:
 	// Called every frame
 	virtual void TickComponent( float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction ) override;
 
-	bool isCloseDoorTriggered();
+	UPROPERTY(BlueprintAssignable)
+	FDoorEvent OnOpenRequest;
 
-	bool isOpenDoorTriggered();
+	UPROPERTY(BlueprintAssignable)
+	FDoorEvent OnCloseRequest;
 
-	void OpenDoor();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (UIMin = "0", UIMax = "359", ClampMin = "0", ClampMax = "359"))
+	float openAngle = 180;
 
-	void CloseDoor();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (UIMin = "0", UIMax = "359", ClampMin = "0", ClampMax = "359"))
+	float closedAngle = 180;
 
 private:
 
-	UPROPERTY(EditAnywhere)
-	ATriggerVolume* PressurePlate;
+	enum DoorState {
+		OPEN,
+		CLOSED,
+		OPENING,
+		CLOSING
+	};
+
+	int state = DoorState::CLOSED;
 
 	UPROPERTY(EditAnywhere)
-	AActor* ActorThatOpens;
+	ATriggerVolume* PressurePlate = nullptr;
 
 	UPROPERTY(EditAnywhere)
 	float DoorCloseDelay;
+
+	UPROPERTY(EditAnywhere)
+	float TriggerMass;
 
 	float LastDoorOpenTime;
 
 	UPROPERTY(EditAnywhere)
 	float openSpeed = 2;
 
-	UPROPERTY(EditAnywhere, meta = (UIMin = "0", UIMax = "359", ClampMin = "0", ClampMax = "359"))
-	float openAngle = 180;
+	bool isCloseDoorTriggered();
 
-	UPROPERTY(EditAnywhere, meta = (UIMin = "0", UIMax = "359", ClampMin = "0", ClampMax = "359"))
-	float closedAngle = 180;
+	bool isOpenDoorTriggered();
+
+	bool isTriggerTriggered();
+
+	void OpenDoor();
+
+	void CloseDoor();
+
+	float GetTotalMassOfActorsOnPlate();
 
 };
