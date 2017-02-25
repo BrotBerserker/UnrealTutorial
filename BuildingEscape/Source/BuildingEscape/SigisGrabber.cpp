@@ -34,13 +34,13 @@ void USigisGrabber::InitializeShit()
 	physicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 
 	if (!physicsHandle) {
-		UE_LOG(LogTemp, Error, TEXT("No physics handler found on actor: %s"), *GetOwner()->GetName());
+		UE_LOG(LogTemp, Fatal, TEXT("No physics handler found on actor: %s"), *GetOwner()->GetName());
 	}
 
 	pawnInput = GetOwner()->FindComponentByClass<UInputComponent>();
 
 	if (!pawnInput) {
-		UE_LOG(LogTemp, Error, TEXT("No input component found on actor: %s"), *GetOwner()->GetName());
+		UE_LOG(LogTemp, Fatal, TEXT("No input component found on actor: %s"), *GetOwner()->GetName());
 	} else {
 		pawnInput->BindAction("Grab", IE_Pressed, this, &USigisGrabber::Grab);
 		pawnInput->BindAction("Grab", IE_Released, this, &USigisGrabber::Release);
