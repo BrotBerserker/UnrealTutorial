@@ -61,10 +61,13 @@
 # Cache files for the editor to use
 */DerivedDataCache/*
 
-BuildingEscape/Content/StarterContent/
-
 *.VC.db
 BuildingEscape/Config/DefaultEngine.ini
 #BuildingEscape/BuildingEscape.sln
 
 */ipch/*
+
+
+# Content Folders
+*/Content/StarterContent/
+*/Content/InfinityBladeEffects/
